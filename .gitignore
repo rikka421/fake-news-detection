@@ -16,198 +16,73 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
+# Virtual Environment
+venv_fakenews/
 venv/
 ENV/
-env.bak/
-venv.bak/
+env/
+.venv
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# Data files
-*.csv
-*.json
-*.pkl
-*.pickle
-*.h5
-*.hdf5
-*.npy
-*.npz
-
-# Large datasets (we have samples in repo, not full datasets)
-data/news_classification/
-data/FakeNewsCorpus/fakenews_medium_5000.csv
-data/FakeNewsCorpus/fakenews_small_1000.csv
-data/FakeNewsCorpus/fakenews_test_10.csv
-data/FakeNewsCorpus/fakenews_tiny_100.csv
-!data/FakeNewsCorpus/README.md
-!data/FakeNewsCorpus/OFFICIAL_README.md
-
-# Model files
-models/*.pkl
-models/*.h5
-models/*.pt
-models/*.pth
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS files
+# Data and Models (large files)
+data/FakeNewsCorpus/news_cleaned_2018_02_13.csv
+data/FakeNewsCorpus/raw/
+models/*.joblib
+!models/general_models/logistic_regression_20260414_155555.joblib
+!models/general_models/random_forest_20260414_155555.joblib
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Local documentation (keep locally)
+archive/
+GITHUB_SETUP_GUIDE.md
+PROJECT_SETUP.md
+DATASET_RESOURCES.md
+project-plan.md
+
+# System files
 .DS_Store
 Thumbs.db
 
-# Log files
+# Logs
 *.log
 
 # Temporary files
-*.tmp
-*.temp
+temp/
+tmp/
 
-# OpenClaw workspace files
-.openclaw/
-.credentials.md
-AGENTS.md
-BEFORE_SLEEP_SKILL.md
-BOOTSTRAP.md
-CURRENT_TASK.md
-DREAMS.md
-HEARTBEAT.md
-IDENTITY.md
-MEMORY.md
-ORGANIZATION_GUIDE.md
-REORGANIZE_FILES_SKILL.md
-SOUL.md
-TOOLS.md
-USER.md
+# Test data
+test_*.csv
+*_test.csv
 
-# Other project directories (not part of this specific project)
-ai-cs-info-collector/
-box/
-journal/
-lessons/ai-ethics/
-lessons/data-analysis-progress/data/news_classification/
-memory/
-open-source-research/
-thesis/
+# Large sample files (keep only small samples)
+data/FakeNewsCorpus/fakenews_medium_5000.csv
+data/FakeNewsCorpus/fakenews_stratified_1000.csv
+!data/FakeNewsCorpus/fakenews_test_10.csv
+!data/FakeNewsCorpus/fakenews_tiny_100.csv
+!data/FakeNewsCorpus/fakenews_small_1000.csv
 
-# PowerShell scripts (temporary)
-*.ps1
-*.psm1
-
-# JavaScript/Node files
-node_modules/
-*.js
-*.ts
-
-# Test files
-test_*.py
+# Keep only essential scripts
+check_data.py
+create_proper_samples.py
+create_samples_simple.ps1
+fix_csv_issues_fixed.py
+quick_demo_fixed.py
+repair_csv_fixed.py
+sample_dataset.py
+sample_fakenews.ps1
+test_data_loading_fixed.py
+test_real_data.py
+requirements_basic.txt
