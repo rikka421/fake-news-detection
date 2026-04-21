@@ -5,7 +5,7 @@ import random
 from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Tuple
 
 import numpy as np
 import torch
@@ -58,6 +58,30 @@ class Vocabulary:
         return len(self.stoi)
 
 
+class HFEncoder:
+    def __init__(self, tokenizer) -> None:
+        self.tokenizer = tokenizer
+        self.pad_token = tokenizer.pad_token or "[PAD]"
+
+    @property
+    def pad_index(self) -> int:
+        return int(self.tokenizer.pad_token_id)
+
+    def encode(self, text: str, max_length: int) -> Tuple[List[int], List[int]]:
+        encoded = self.tokenizer(
+            text,
+            padding="max_length",
+            truncation=True,
+            max_length=max_length,
+            return_attention_mask=True,
+            add_special_tokens=True,
+        )
+        return encoded["input_ids"], encoded["attention_mask"]
+
+    def __len__(self) -> int:
+        return int(self.tokenizer.vocab_size)
+
+
 def build_vocabulary(texts: Iterable[str], min_frequency: int = 2, max_tokens: int = 20000) -> Vocabulary:
     counter: Counter[str] = Counter()
     for text in texts:
@@ -82,8 +106,14 @@ class EncodedNewsDataset(Dataset):
         return len(self.labels)
 
     def __getitem__(self, index: int) -> Dict[str, torch.Tensor]:
-        input_ids = torch.tensor(self.vocabulary.encode(self.texts[index], self.max_length), dtype=torch.long)
-        attention_mask = (input_ids != self.vocabulary.pad_index).long()
+        encoded = self.vocabulary.encode(self.texts[index], self.max_length)
+        if isinstance(encoded, tuple):
+            token_ids, mask_ids = encoded
+            input_ids = torch.tensor(token_ids, dtype=torch.long)
+            attention_mask = torch.tensor(mask_ids, dtype=torch.long)
+        else:
+            input_ids = torch.tensor(encoded, dtype=torch.long)
+            attention_mask = (input_ids != self.vocabulary.pad_index).long()
         label = torch.tensor(self.labels[index], dtype=torch.long)
         return {
             "input_ids": input_ids,
@@ -115,6 +145,9 @@ class BenchmarkConfig:
     text_mode: str = "all_fields"
     mask_label_tokens: bool = False
     split_mode: str = "random"
+    tokenizer_source: str = "simple"
+    pretrained_model_name: str = "google/bert_uncased_L-2_H-128_A-2"
+    freeze_pretrained_embeddings: bool = True
 
 
 def _frame_to_lists(frame) -> tuple[List[str], List[str]]:
@@ -324,12 +357,16 @@ def _evaluate(model, data_loader, device: torch.device) -> Dict[str, float]:
 
 
 def _build_model(model_name: str, vocabulary: Vocabulary, num_classes: int, config: BenchmarkConfig):
+    pretrained_embeddings = getattr(config, "_pretrained_embeddings", None)
+    freeze_embedding = config.freeze_pretrained_embeddings
     if model_name == "cnn":
         return CNNTextClassifier(
             vocab_size=len(vocabulary),
             num_classes=num_classes,
             pad_index=vocabulary.pad_index,
             embedding_dim=config.embedding_dim,
+            pretrained_embeddings=pretrained_embeddings,
+            freeze_embedding=freeze_embedding,
         )
     if model_name == "transformer":
         return TransformerTextClassifier(
@@ -338,8 +375,20 @@ def _build_model(model_name: str, vocabulary: Vocabulary, num_classes: int, conf
             pad_index=vocabulary.pad_index,
             embedding_dim=config.embedding_dim,
             max_length=config.max_length,
+            pretrained_embeddings=pretrained_embeddings,
+            freeze_embedding=freeze_embedding,
         )
     raise ValueError(f"Unsupported deep model: {model_name}")
+
+
+def _build_hf_encoder_and_embeddings(config: BenchmarkConfig) -> Tuple[HFEncoder, torch.Tensor]:
+    from transformers import BertModel, BertTokenizer
+
+    tokenizer = BertTokenizer.from_pretrained(config.pretrained_model_name)
+    encoder = HFEncoder(tokenizer)
+    backbone = BertModel.from_pretrained(config.pretrained_model_name)
+    pretrained_embeddings = backbone.get_input_embeddings().weight.detach().cpu()
+    return encoder, pretrained_embeddings
 
 
 def run_deep_model(model_name: str, train_frame, validation_frame, test_frame, config: BenchmarkConfig) -> Dict[str, float]:
@@ -348,7 +397,20 @@ def run_deep_model(model_name: str, train_frame, validation_frame, test_frame, c
     test_texts, test_labels = _frame_to_lists(test_frame)
     label_to_index, encoded_groups = _encode_labels(train_labels, validation_labels, test_labels)
     encoded_train, encoded_validation, encoded_test = encoded_groups
-    vocabulary = build_vocabulary(train_texts, min_frequency=config.min_frequency)
+    tokenizer_source = config.tokenizer_source
+    pretrained_model_used = "none"
+    if tokenizer_source == "pretrained":
+        try:
+            vocabulary, pretrained_embeddings = _build_hf_encoder_and_embeddings(config)
+            config._pretrained_embeddings = pretrained_embeddings
+            pretrained_model_used = config.pretrained_model_name
+        except Exception:
+            vocabulary = build_vocabulary(train_texts, min_frequency=config.min_frequency)
+            config._pretrained_embeddings = None
+            pretrained_model_used = "fallback_simple"
+    else:
+        vocabulary = build_vocabulary(train_texts, min_frequency=config.min_frequency)
+        config._pretrained_embeddings = None
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_dataset = EncodedNewsDataset(train_texts, encoded_train, vocabulary, config.max_length)
@@ -387,6 +449,8 @@ def run_deep_model(model_name: str, train_frame, validation_frame, test_frame, c
         "test_macro_f1": test_metrics["macro_f1"],
         "device": str(device),
         "vocab_size": len(vocabulary),
+        "tokenizer_source": tokenizer_source,
+        "pretrained_model_used": pretrained_model_used,
     }
 
 

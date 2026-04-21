@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import torch
 from torch import nn
+from typing import Optional
 
 
 class CNNTextClassifier(nn.Module):
@@ -14,9 +15,19 @@ class CNNTextClassifier(nn.Module):
         num_filters: int = 128,
         kernel_sizes: tuple[int, ...] = (3, 4, 5),
         dropout: float = 0.2,
+        pretrained_embeddings: Optional[torch.Tensor] = None,
+        freeze_embedding: bool = True,
     ) -> None:
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_index)
+        if pretrained_embeddings is not None:
+            self.embedding = nn.Embedding.from_pretrained(
+                pretrained_embeddings,
+                freeze=freeze_embedding,
+                padding_idx=pad_index,
+            )
+            embedding_dim = pretrained_embeddings.size(1)
+        else:
+            self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_index)
         self.convs = nn.ModuleList(
             [nn.Conv1d(embedding_dim, num_filters, kernel_size) for kernel_size in kernel_sizes]
         )
@@ -43,9 +54,19 @@ class TransformerTextClassifier(nn.Module):
         feedforward_dim: int = 256,
         dropout: float = 0.2,
         max_length: int = 128,
+        pretrained_embeddings: Optional[torch.Tensor] = None,
+        freeze_embedding: bool = True,
     ) -> None:
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_index)
+        if pretrained_embeddings is not None:
+            self.embedding = nn.Embedding.from_pretrained(
+                pretrained_embeddings,
+                freeze=freeze_embedding,
+                padding_idx=pad_index,
+            )
+            embedding_dim = pretrained_embeddings.size(1)
+        else:
+            self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_index)
         self.position_embedding = nn.Embedding(max_length, embedding_dim)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=embedding_dim,

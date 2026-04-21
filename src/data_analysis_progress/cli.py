@@ -40,6 +40,24 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["random", "grouped_content", "grouped_title_content"],
         help="How to split data into train/validation/test",
     )
+    parser.add_argument(
+        "--tokenizer-source",
+        type=str,
+        default="simple",
+        choices=["simple", "pretrained"],
+        help="Tokenizer source for deep models",
+    )
+    parser.add_argument(
+        "--pretrained-model-name",
+        type=str,
+        default="google/bert_uncased_L-2_H-128_A-2",
+        help="HF model used for tokenizer and embedding initialization",
+    )
+    parser.add_argument(
+        "--freeze-pretrained-embeddings",
+        action="store_true",
+        help="Freeze pretrained embedding weights in deep models",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--output", default=None, help="Optional JSON output path")
     return parser
@@ -60,6 +78,9 @@ def main() -> None:
         text_mode=args.text_mode,
         mask_label_tokens=args.mask_label_tokens,
         split_mode=args.split_mode,
+        tokenizer_source=args.tokenizer_source,
+        pretrained_model_name=args.pretrained_model_name,
+        freeze_pretrained_embeddings=args.freeze_pretrained_embeddings,
     )
     report = run_benchmark(config)
     output_path = write_benchmark_report(report, args.output)
