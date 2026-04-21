@@ -1,0 +1,38 @@
+# Python cache and build outputs
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Editors and notebooks
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Local system files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+temp/
+tmp/
+
+# Large raw corpus source file
+data/FakeNewsCorpus/news_cleaned_2018_02_13.csv
+
+# Generated experiment outputs
+artifacts/
