@@ -78,6 +78,35 @@ For a direct 100k logistic baseline:
 python scripts/train_100k_direct.py --max-rows 100000 --chunksize 50000 --output artifacts/results/real_dataset_logreg_report_100k.json
 ```
 
+## Serving API (For Frontend Integration)
+
+Train and export the serving model:
+
+```bash
+python scripts/train_serving_model.py
+```
+
+Start the API service:
+
+```bash
+python -m data_analysis_progress.api
+```
+
+API endpoints:
+
+- `GET /health`
+- `GET /model-info`
+- `POST /predict`
+- `POST /predict-batch`
+
+See frontend integration doc:
+
+- `docs/前端接口对接说明.md`
+
+Project report:
+
+- `docs/小组项目技术报告_简版.md`
+
 ## Notes
 
 - The full 29.3GB source corpus file is not tracked by git.

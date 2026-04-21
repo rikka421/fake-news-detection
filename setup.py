@@ -53,6 +53,7 @@ setup(
     entry_points={
         "console_scripts": [
             "data-analysis-progress=data_analysis_progress.cli:main",
+            "data-analysis-api=data_analysis_progress.api:main",
         ],
     },
 )
