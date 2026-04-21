@@ -9,14 +9,17 @@ from typing import Dict, Iterable, List
 
 import numpy as np
 import torch
+from lightgbm import LGBMClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from xgboost import XGBClassifier
 
 from .data import load_news_dataset, project_root, simple_tokenize, split_dataset
 from .models import CNNTextClassifier, TransformerTextClassifier
@@ -104,6 +107,8 @@ class BenchmarkConfig:
         "svm",
         "random_forest",
         "naive_bayes",
+        "xgboost",
+        "lightgbm",
         "cnn",
         "transformer",
     )
@@ -216,6 +221,71 @@ def run_naive_bayes(train_frame, validation_frame, test_frame) -> Dict[str, floa
     classifier.fit(features["train_features"], features["train_labels"])
     validation_predictions = classifier.predict(features["validation_features"])
     test_predictions = classifier.predict(features["test_features"])
+    return _summarize_predictions(
+        features["validation_labels"],
+        validation_predictions,
+        features["test_labels"],
+        test_predictions,
+    )
+
+
+def _encode_classical_labels(train_labels, validation_labels, test_labels):
+    encoder = LabelEncoder()
+    encoder.fit(list(train_labels) + list(validation_labels) + list(test_labels))
+    return encoder, encoder.transform(train_labels), encoder.transform(validation_labels), encoder.transform(test_labels)
+
+
+def run_xgboost(train_frame, validation_frame, test_frame, seed: int) -> Dict[str, float]:
+    features = _build_classical_features(train_frame, validation_frame, test_frame)
+    encoder, encoded_train, _, _ = _encode_classical_labels(
+        features["train_labels"],
+        features["validation_labels"],
+        features["test_labels"],
+    )
+    classifier = XGBClassifier(
+        n_estimators=250,
+        max_depth=6,
+        learning_rate=0.1,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        objective="multi:softprob",
+        eval_metric="mlogloss",
+        tree_method="hist",
+        random_state=seed,
+        n_jobs=4,
+    )
+    classifier.fit(features["train_features"], encoded_train)
+    validation_predictions = encoder.inverse_transform(classifier.predict(features["validation_features"]))
+    test_predictions = encoder.inverse_transform(classifier.predict(features["test_features"]))
+    return _summarize_predictions(
+        features["validation_labels"],
+        validation_predictions,
+        features["test_labels"],
+        test_predictions,
+    )
+
+
+def run_lightgbm(train_frame, validation_frame, test_frame, seed: int) -> Dict[str, float]:
+    features = _build_classical_features(train_frame, validation_frame, test_frame)
+    encoder, encoded_train, _, _ = _encode_classical_labels(
+        features["train_labels"],
+        features["validation_labels"],
+        features["test_labels"],
+    )
+    classifier = LGBMClassifier(
+        n_estimators=250,
+        learning_rate=0.08,
+        num_leaves=63,
+        max_depth=-1,
+        objective="multiclass",
+        random_state=seed,
+        n_jobs=4,
+        class_weight="balanced",
+        verbose=-1,
+    )
+    classifier.fit(features["train_features"], encoded_train)
+    validation_predictions = encoder.inverse_transform(classifier.predict(features["validation_features"]))
+    test_predictions = encoder.inverse_transform(classifier.predict(features["test_features"]))
     return _summarize_predictions(
         features["validation_labels"],
         validation_predictions,
@@ -361,6 +431,20 @@ def run_benchmark(config: BenchmarkConfig) -> Dict[str, object]:
                 train_frame,
                 validation_frame,
                 test_frame,
+            )
+        elif model_name == "xgboost":
+            results[model_name] = run_xgboost(
+                train_frame,
+                validation_frame,
+                test_frame,
+                seed=config.seed,
+            )
+        elif model_name == "lightgbm":
+            results[model_name] = run_lightgbm(
+                train_frame,
+                validation_frame,
+                test_frame,
+                seed=config.seed,
             )
         else:
             results[model_name] = run_deep_model(

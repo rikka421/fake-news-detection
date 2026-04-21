@@ -11,8 +11,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--models",
         nargs="+",
-        default=["logistic_regression", "svm", "random_forest", "naive_bayes", "cnn", "transformer"],
-        choices=["logistic_regression", "svm", "random_forest", "naive_bayes", "cnn", "transformer"],
+        default=["logistic_regression", "svm", "random_forest", "naive_bayes", "xgboost", "lightgbm", "cnn", "transformer"],
+        choices=["logistic_regression", "svm", "random_forest", "naive_bayes", "xgboost", "lightgbm", "cnn", "transformer"],
         help="Models to benchmark",
     )
     parser.add_argument("--epochs", type=int, default=5, help="Number of epochs for deep models")
