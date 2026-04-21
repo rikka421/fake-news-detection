@@ -12,6 +12,9 @@ import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
@@ -96,7 +99,14 @@ class BenchmarkConfig:
     embedding_dim: int = 128
     min_frequency: int = 2
     seed: int = 42
-    models: tuple[str, ...] = ("logistic_regression", "cnn", "transformer")
+    models: tuple[str, ...] = (
+        "logistic_regression",
+        "svm",
+        "random_forest",
+        "naive_bayes",
+        "cnn",
+        "transformer",
+    )
     text_mode: str = "all_fields"
     mask_label_tokens: bool = False
     split_mode: str = "random"
@@ -137,6 +147,81 @@ def run_logistic_regression(train_frame, validation_frame, test_frame, seed: int
         "test_accuracy": accuracy_score(test_labels, test_predictions),
         "test_macro_f1": f1_score(test_labels, test_predictions, average="macro"),
     }
+
+
+def _build_classical_features(train_frame, validation_frame, test_frame):
+    train_texts, train_labels = _frame_to_lists(train_frame)
+    validation_texts, validation_labels = _frame_to_lists(validation_frame)
+    test_texts, test_labels = _frame_to_lists(test_frame)
+
+    vectorizer = TfidfVectorizer(max_features=20000, ngram_range=(1, 2), stop_words="english")
+    train_features = vectorizer.fit_transform(train_texts)
+    validation_features = vectorizer.transform(validation_texts)
+    test_features = vectorizer.transform(test_texts)
+    return {
+        "train_features": train_features,
+        "validation_features": validation_features,
+        "test_features": test_features,
+        "train_labels": train_labels,
+        "validation_labels": validation_labels,
+        "test_labels": test_labels,
+    }
+
+
+def _summarize_predictions(validation_labels, validation_predictions, test_labels, test_predictions) -> Dict[str, float]:
+    return {
+        "validation_accuracy": accuracy_score(validation_labels, validation_predictions),
+        "validation_macro_f1": f1_score(validation_labels, validation_predictions, average="macro"),
+        "test_accuracy": accuracy_score(test_labels, test_predictions),
+        "test_macro_f1": f1_score(test_labels, test_predictions, average="macro"),
+    }
+
+
+def run_svm(train_frame, validation_frame, test_frame, seed: int) -> Dict[str, float]:
+    features = _build_classical_features(train_frame, validation_frame, test_frame)
+    classifier = LinearSVC(random_state=seed, class_weight="balanced")
+    classifier.fit(features["train_features"], features["train_labels"])
+    validation_predictions = classifier.predict(features["validation_features"])
+    test_predictions = classifier.predict(features["test_features"])
+    return _summarize_predictions(
+        features["validation_labels"],
+        validation_predictions,
+        features["test_labels"],
+        test_predictions,
+    )
+
+
+def run_random_forest(train_frame, validation_frame, test_frame, seed: int) -> Dict[str, float]:
+    features = _build_classical_features(train_frame, validation_frame, test_frame)
+    classifier = RandomForestClassifier(
+        n_estimators=300,
+        random_state=seed,
+        class_weight="balanced_subsample",
+        n_jobs=-1,
+    )
+    classifier.fit(features["train_features"], features["train_labels"])
+    validation_predictions = classifier.predict(features["validation_features"])
+    test_predictions = classifier.predict(features["test_features"])
+    return _summarize_predictions(
+        features["validation_labels"],
+        validation_predictions,
+        features["test_labels"],
+        test_predictions,
+    )
+
+
+def run_naive_bayes(train_frame, validation_frame, test_frame) -> Dict[str, float]:
+    features = _build_classical_features(train_frame, validation_frame, test_frame)
+    classifier = MultinomialNB()
+    classifier.fit(features["train_features"], features["train_labels"])
+    validation_predictions = classifier.predict(features["validation_features"])
+    test_predictions = classifier.predict(features["test_features"])
+    return _summarize_predictions(
+        features["validation_labels"],
+        validation_predictions,
+        features["test_labels"],
+        test_predictions,
+    )
 
 
 def _train_epoch(model, data_loader, optimizer, criterion, device: torch.device) -> float:
@@ -256,6 +341,26 @@ def run_benchmark(config: BenchmarkConfig) -> Dict[str, object]:
                 validation_frame,
                 test_frame,
                 seed=config.seed,
+            )
+        elif model_name == "svm":
+            results[model_name] = run_svm(
+                train_frame,
+                validation_frame,
+                test_frame,
+                seed=config.seed,
+            )
+        elif model_name == "random_forest":
+            results[model_name] = run_random_forest(
+                train_frame,
+                validation_frame,
+                test_frame,
+                seed=config.seed,
+            )
+        elif model_name == "naive_bayes":
+            results[model_name] = run_naive_bayes(
+                train_frame,
+                validation_frame,
+                test_frame,
             )
         else:
             results[model_name] = run_deep_model(
