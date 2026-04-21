@@ -1,88 +1,38 @@
-# Python
+# Python cache and build outputs
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
 
-# Virtual Environment
-venv_fakenews/
+# Virtual environments
+.venv/
 venv/
-ENV/
 env/
-.venv
+ENV/
 
-# IDE
+# Editors and notebooks
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# Data and Models (large files)
-data/FakeNewsCorpus/news_cleaned_2018_02_13.csv
-data/FakeNewsCorpus/raw/
-models/*.joblib
-!models/general_models/logistic_regression_20260414_155555.joblib
-!models/general_models/random_forest_20260414_155555.joblib
-
-# Notebook checkpoints
 .ipynb_checkpoints/
 notebooks/.ipynb_checkpoints/
 
-# Local documentation (keep locally)
-archive/
-GITHUB_SETUP_GUIDE.md
-PROJECT_SETUP.md
-DATASET_RESOURCES.md
-project-plan.md
-
-# System files
+# Local system files
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs and temp files
 *.log
-
-# Temporary files
 temp/
 tmp/
 
-# Test data
-test_*.csv
-*_test.csv
+# Large raw corpus source file
+data/FakeNewsCorpus/news_cleaned_2018_02_13.csv
 
-# Large sample files (keep only small samples)
-data/FakeNewsCorpus/fakenews_medium_5000.csv
-data/FakeNewsCorpus/fakenews_stratified_1000.csv
-!data/FakeNewsCorpus/fakenews_test_10.csv
-!data/FakeNewsCorpus/fakenews_tiny_100.csv
-!data/FakeNewsCorpus/fakenews_small_1000.csv
-
-# Keep only essential scripts
-check_data.py
-create_proper_samples.py
-create_samples_simple.ps1
-fix_csv_issues_fixed.py
-quick_demo_fixed.py
-repair_csv_fixed.py
-sample_dataset.py
-sample_fakenews.ps1
-test_data_loading_fixed.py
-test_real_data.py
-requirements_basic.txt
+# Generated experiment outputs
+artifacts/

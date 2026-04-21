@@ -11,14 +11,14 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.read().splitlines()
 
 setup(
-    name="news-classification-analysis",
+    name="data-analysis-progress",
     version="0.1.0",
     author="rikka421",
     author_email="3550124064@qq.com",
-    description="A comprehensive system for news classification and fake news detection",
+    description="Fake-news detection experiments with classical and deep learning baselines",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/rikka421/data-analysis-news-classification",
+    url="https://github.com/rikka421/data-analysis-progress",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
@@ -52,7 +52,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "news-analysis=src.cli:main",
+            "data-analysis-progress=data_analysis_progress.cli:main",
         ],
     },
 )

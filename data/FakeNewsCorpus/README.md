@@ -1,7 +1,7 @@
-# FakeNewsCorpus Samples
+# FakeNewsCorpus Raw Subsets
 
 ## Overview
-This directory contains sampled versions of the Fake News Corpus dataset for use in training and testing fake news detection models. The original dataset is 29.3GB, too large for typical workflows, so these samples provide manageable subsets.
+This directory now contains raw subsets built directly from the original 29.3GB Fake News Corpus CSV. Older regenerated, repaired, and exploratory sample files were removed so the project uses one consistent subset policy.
 
 ## Dataset Information (From Official README)
 
@@ -42,25 +42,26 @@ The corpus was created by:
 - **Rows:** 9,408,908 articles
 - **Columns:** id, domain, type, url, content, scraped_at, inserted_at, updated_at, title, authors, keywords, meta_keywords, meta_description, tags, summary, source
 
-## Sample Files Created
+## Active Subset Files
 
-### Quick Test Samples
-1. **`fakenews_test_10.csv`** - 10 rows, 0.00 MB
-   - For quick code testing and data structure verification
+1. **`fakenews_tiny_10_raw.csv`**
+   - 10 raw rows
+   - Use first when trying a new model or data pipeline
 
-2. **`fakenews_tiny_100.csv`** - 100 rows, 0.02 MB
-   - For rapid prototyping and debugging
+2. **`fakenews_small_100_raw.csv`**
+   - 100 raw rows
+   - Good for fast iteration after tiny passes
 
-### Training Samples
-3. **`fakenews_small_1000.csv`** - 1000 rows, 0.11 MB
-   - Recommended for initial model training and hyperparameter tuning
+3. **`fakenews_medium_1000_raw.csv`**
+   - 1000 raw rows
+   - Recommended for normal model development
 
-4. **`fakenews_medium_5000.csv`** - 5000 rows, 0.65 MB
-   - For more robust training and validation
+4. **`fakenews_large_10000_raw.csv`**
+   - 10000 raw rows
+   - Use for stronger final comparisons on local hardware
 
-### Special Samples
-5. **`fakenews_stratified_1000.csv`** - 162 rows, 0.08 MB
-   - Attempt at balanced sampling by type (limited success due to parsing issues)
+5. **`raw_subset_manifest.json`**
+   - Summary of subset sizes and label counts
 
 ## Data Structure
 Each CSV file contains the following columns:
@@ -87,9 +88,10 @@ Each CSV file contains the following columns:
 ## Usage Recommendations
 
 ### For Model Development:
-1. **Start with `fakenews_test_10.csv`** to verify your data loading pipeline
-2. **Use `fakenews_small_1000.csv`** for initial model training and hyperparameter tuning
-3. **Validate with `fakenews_medium_5000.csv`** for more reliable performance metrics
+1. Start with `fakenews_tiny_10_raw.csv` to verify the pipeline
+2. Move to `fakenews_small_100_raw.csv` for fast iteration
+3. Use `fakenews_medium_1000_raw.csv` for routine comparisons
+4. Use `fakenews_large_10000_raw.csv` for final evaluation runs
 
 ### For Analysis:
 - The `type` column contains labels like "rumor", "hate", "conspiracy", etc.
@@ -128,30 +130,29 @@ lessons/data-analysis-progress/
 ├── data/
 │   └── FakeNewsCorpus/
 │       ├── README.md              # This file
-│       ├── fakenews_test_10.csv   # 10 rows for testing
-│       ├── fakenews_tiny_100.csv  # 100 rows
-│       ├── fakenews_small_1000.csv # 1000 rows (recommended)
-│       ├── fakenews_medium_5000.csv # 5000 rows
-│       └── fakenews_stratified_1000.csv # Attempt at balanced
+│       ├── fakenews_tiny_10_raw.csv
+│       ├── fakenews_small_100_raw.csv
+│       ├── fakenews_medium_1000_raw.csv
+│       ├── fakenews_large_10000_raw.csv
+│       └── raw_subset_manifest.json
 └── ... other project files
 ```
 
 ## Next Steps
 
-1. **Analyze label distribution** in the samples
-2. **Preprocess text data** (cleaning, tokenization)
-3. **Train classification models** using the samples
-4. **Compare performance** across different sample sizes
-5. **Consider creating a balanced dataset** if needed for your specific task
+1. Analyze label distribution in the raw subsets
+2. Train on `tiny` first for every new model path
+3. Compare models on `medium` and `large`
+4. Add stronger real-data evaluation scripts as needed
 
 ## Documentation
 - **Official README:** `OFFICIAL_README.md` (moved from Downloads)
 - **Project Documentation:** This file (`README.md`)
-- **Dataset Resources:** `../../DATASET_RESOURCES.md`
+- **Subset Manifest:** `raw_subset_manifest.json`
 
 ## Created
-- **Date:** 2026-04-14
-- **Purpose:** Data Analysis and Progress course project
+- **Date:** 2026-04-21
+- **Purpose:** Real-data subset workflow for model development
 - **Original dataset:** FakeNewsCorpus v1.0 (29.3GB, 9.4M articles)
-- **Sampling method:** First N rows (sequential sampling)
+- **Sampling method:** Deterministic hash-based subset from a bounded raw scan
 - **Official Source:** https://github.com/several27/FakeNewsCorpus

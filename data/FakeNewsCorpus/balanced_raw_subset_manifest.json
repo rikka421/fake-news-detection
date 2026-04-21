@@ -1,0 +1,70 @@
+{
+  "balanced_tiny": {
+    "path": "C:\\Users\\22130\\Desktop\\worksapce\\projects\\data-analysis-progress\\data\\FakeNewsCorpus\\fakenews_balanced_tiny_10_raw.csv",
+    "rows": 10,
+    "per_label_quota": 1,
+    "labels": {
+      "bias": 1,
+      "clickbait": 1,
+      "conspiracy": 1,
+      "fake": 1,
+      "hate": 1,
+      "junksci": 1,
+      "political": 1,
+      "reliable": 1,
+      "satire": 1,
+      "unreliable": 1
+    }
+  },
+  "balanced_small": {
+    "path": "C:\\Users\\22130\\Desktop\\worksapce\\projects\\data-analysis-progress\\data\\FakeNewsCorpus\\fakenews_balanced_small_100_raw.csv",
+    "rows": 100,
+    "per_label_quota": 10,
+    "labels": {
+      "bias": 10,
+      "clickbait": 10,
+      "conspiracy": 10,
+      "fake": 10,
+      "hate": 10,
+      "junksci": 10,
+      "political": 10,
+      "reliable": 10,
+      "satire": 10,
+      "unreliable": 10
+    }
+  },
+  "balanced_medium": {
+    "path": "C:\\Users\\22130\\Desktop\\worksapce\\projects\\data-analysis-progress\\data\\FakeNewsCorpus\\fakenews_balanced_medium_1000_raw.csv",
+    "rows": 1000,
+    "per_label_quota": 100,
+    "labels": {
+      "bias": 100,
+      "clickbait": 100,
+      "conspiracy": 100,
+      "fake": 100,
+      "hate": 100,
+      "junksci": 100,
+      "political": 100,
+      "reliable": 100,
+      "satire": 100,
+      "unreliable": 100
+    }
+  },
+  "balanced_large": {
+    "path": "C:\\Users\\22130\\Desktop\\worksapce\\projects\\data-analysis-progress\\data\\FakeNewsCorpus\\fakenews_balanced_large_10000_raw.csv",
+    "rows": 10000,
+    "per_label_quota": 1000,
+    "labels": {
+      "bias": 1000,
+      "clickbait": 1000,
+      "conspiracy": 1000,
+      "fake": 1000,
+      "hate": 1000,
+      "junksci": 1000,
+      "political": 1000,
+      "reliable": 1000,
+      "satire": 1000,
+      "unreliable": 1000
+    }
+  }
+}
