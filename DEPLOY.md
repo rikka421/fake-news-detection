@@ -20,6 +20,8 @@ docker compose up --build
 服务启动后访问 `http://localhost:8000`，无需任何额外配置。  
 **不需要重新训练**，模型文件已包含在仓库中。
 
+说明：`docs/前端接口对接说明.md` 中提到的 `train_serving_model.py` 仅用于“更新模型”场景，不是默认部署前置步骤。
+
 ---
 
 ## 接口使用
