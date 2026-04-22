@@ -10,10 +10,6 @@ from sklearn.model_selection import train_test_split
 
 
 DATASET_ALIASES: Dict[str, str] = {
-    "tiny": "fakenews_tiny_10_raw.csv",
-    "small": "fakenews_small_100_raw.csv",
-    "medium": "fakenews_medium_1000_raw.csv",
-    "large": "fakenews_large_10000_raw.csv",
     "balanced_tiny": "fakenews_balanced_tiny_10_raw.csv",
     "balanced_small": "fakenews_balanced_small_100_raw.csv",
     "balanced_medium": "fakenews_balanced_medium_1000_raw.csv",

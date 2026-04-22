@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains a clean, real-data fake-news classification workflow using FakeNewsCorpus subsets. It supports classical ML and PyTorch neural baselines and follows a tiny-first validation flow before larger runs.
+This repository contains a clean, real-data fake-news classification workflow using balanced FakeNewsCorpus subsets. It supports classical ML, lightweight neural baselines, and an optional <=0.5B LLM experiment track.
 
 ## Project Organization
 
@@ -19,11 +19,6 @@ data-analysis-progress/
 
 ## Dataset Aliases
 
-- raw datasets:
-	- `tiny`: 10 rows
-	- `small`: 100 rows
-	- `medium`: 1000 rows
-	- `large`: 10000 rows
 - balanced datasets (10 labels):
 	- `balanced_tiny`: 10 rows
 	- `balanced_small`: 100 rows
@@ -33,6 +28,11 @@ data-analysis-progress/
 ## Models
 
 - `logistic_regression` (TF-IDF)
+- `svm`
+- `random_forest`
+- `naive_bayes`
+- `xgboost`
+- `lightgbm`
 - `cnn` (PyTorch)
 - `transformer` (lightweight PyTorch encoder)
 
@@ -47,22 +47,16 @@ pip install -r requirements.txt
 Run a tiny smoke test:
 
 ```bash
-python scripts/run_news_benchmark.py --dataset tiny --models logistic_regression cnn transformer --epochs 2
+python scripts/run_news_benchmark.py --dataset balanced_tiny --models logistic_regression cnn transformer --epochs 2
 ```
 
-Run staged tiny-first benchmark up to a target dataset:
+Run all models on `balanced_large`:
 
 ```bash
-python scripts/run_staged_benchmark.py --target-dataset balanced_medium --text-mode title_content --mask-label-tokens
+python scripts/run_news_benchmark.py --dataset balanced_large --models logistic_regression svm random_forest naive_bayes xgboost lightgbm cnn transformer --epochs 3 --text-mode title_content --mask-label-tokens --split-mode grouped_title_content --output artifacts/results/benchmark_balanced_large_all_models.json
 ```
 
 ## Rebuild Subsets
-
-Build deterministic raw subsets:
-
-```bash
-python scripts/build_raw_subsets.py
-```
 
 Build balanced raw subsets:
 
@@ -70,13 +64,15 @@ Build balanced raw subsets:
 python scripts/build_balanced_raw_subsets.py
 ```
 
-## 100k Direct Training
+## Optional <=0.5B LLM Evaluation
 
-For a direct 100k logistic baseline:
+Run Qwen2.5-0.5B generation-mode test (GPU preferred):
 
 ```bash
-python scripts/train_100k_direct.py --max-rows 100000 --chunksize 50000 --output artifacts/results/real_dataset_logreg_report_100k.json
+python scripts/eval_llm_zero_shot.py --model Qwen/Qwen2.5-0.5B-Instruct --dataset balanced_large --method generation --max-samples 1000 --sample-mode random --precision auto --mask-label-tokens --split-mode grouped_title_content --output artifacts/results/llm_qwen_0p5b_generation_1000_gpu.json
 ```
+
+Note: This script reports startup time, average sample time, throughput, and projected 10k runtime.
 
 ## Serving API (For Frontend Integration)
 
@@ -106,6 +102,7 @@ See frontend integration doc:
 Project report:
 
 - `docs/小组项目技术报告_简版.md`
+- `docs/项目技术报告_中文版.md`
 
 ## Notes
 

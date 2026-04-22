@@ -7,7 +7,7 @@ from .training import BenchmarkConfig, run_benchmark, write_benchmark_report
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Fake-news benchmark runner")
-    parser.add_argument("--dataset", default="medium", help="Dataset alias or relative CSV path")
+    parser.add_argument("--dataset", default="balanced_medium", help="Dataset alias or relative CSV path")
     parser.add_argument(
         "--models",
         nargs="+",
