@@ -108,3 +108,10 @@ Project report:
 
 - The full 29.3GB source corpus file is not tracked by git.
 - Generated outputs under `artifacts/` are ignored by default.
+
+## Current Status (2026-04-22)
+
+- End-to-end pipeline is ready for delivery (training, benchmark, serving, docs).
+- `balanced_large` full-model benchmark has been completed.
+- Frontend deployment docs and Docker deployment flow are finalized.
+- <=0.5B LLM track is kept as an offline research path, not the default production path.
